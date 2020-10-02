@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   Image,
   StyleSheet,
@@ -12,21 +12,18 @@ import RNFetchBlob from 'rn-fetch-blob';
 import {Button, Gap, Loading} from '../../components';
 import {showError, showSuccess} from '../../utils';
 import LinearGradient from 'react-native-linear-gradient';
+import Axios from 'axios';
 
 const Screen2 = () => {
   const [pic, setPic] = useState({
     pic: null,
   });
   const [avatar, setAvatar] = useState([]);
-  const [names, setNames] = useState({
-    name: '',
-  });
+  const [names, setNames] = useState('');
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {}, []);
-
-  const myfun = () => {
+  myfun = () => {
     ImagePicker.showImagePicker((response) => {
       console.log('Response = ', response);
 
@@ -36,7 +33,10 @@ const Screen2 = () => {
         showError('Oops, sepertinya ada masalah');
       } else {
         let source = {uri: response.uri};
-        setAvatar(source);
+        // setAvatar(source);
+        let newArr = [...avatar, source];
+        console.log('ini apa ?:', newArr);
+        setAvatar(newArr);
         setPic(response.data);
         showSuccess('Selamat anda sukses menambahkan gambar');
       }
@@ -44,24 +44,29 @@ const Screen2 = () => {
   };
   const uploadPic = () => {
     setLoading(true);
-    RNFetchBlob.fetch(
-      'POST',
-      'https://dev.dispenda.online/api/post-screen-2',
-      {
-        'Content-Type': 'multipart/form-data',
+    console.log('ininama :', names);
+    console.log('inipoto :', avatar);
+    fetch('https://dev.dispenda.online/api/post-screen-2', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      [
-        {name: 'name', data: names},
-        // name: image adalah nama properti dari api kita
-        {name: 'image', filename: 'tempbody.jpg', data: pic},
-      ],
-    ).then((resp) => {
-      showSuccess('Photo yang anda upload success');
-      setLoading(false);
-      console.log('Response Saya');
-      console.log(resp.data);
-      setAvatar({avatarSource: null});
-    });
+      body: JSON.stringify({
+        name: names,
+        images: avatar,
+      }),
+    })
+      .then((response) => response.json())
+      .then((json) => {
+        showSuccess('Photo yang anda upload success');
+        console.error(json);
+        setLoading(false);
+      })
+      .catch((error) => {
+        showError('error');
+        console.error(error);
+        setLoading(false);
+      });
   };
 
   return (
@@ -73,17 +78,21 @@ const Screen2 = () => {
           <TextInput
             style={styles.input}
             value={names.name}
-            onChangeText={(value) => setNames('name', value)}
+            onChangeText={(value) => setNames(value)}
           />
           <Gap height={18} />
           <Text style={styles.text}>Gambar</Text>
           <Gap height={18} />
           <View style={{flexDirection: 'row'}}>
-            <Image source={avatar} style={styles.photo} />
-            <Gap width={13} />
-            <Image source={avatar} style={styles.photo} />
-            <Gap width={13} />
-            <Image source={avatar} style={styles.photo} />
+            {avatar.map((poto, id) => {
+              return (
+                <>
+                  <Image key={id} source={poto} style={styles.photo} />
+                  <Gap width={13} />
+                </>
+              );
+            })}
+
             <Gap width={13} />
             <TouchableOpacity style={styles.plus} onPress={myfun}>
               <Text style={{color: 'white', fontSize: 40, textAlign: 'center'}}>
