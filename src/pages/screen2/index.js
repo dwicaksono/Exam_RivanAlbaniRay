@@ -32,9 +32,9 @@ const Screen2 = () => {
       } else if (response.error) {
         showError('Oops, sepertinya ada masalah');
       } else {
-        let source = {uri: response.uri};
+        let source = {uri: response.uri}; // yang di set ke source object
         // setAvatar(source);
-        let newArr = [...avatar, source];
+        let newArr = [...avatar, source.uri]; //ini object di jadikan data bisa karena body array yang di minta isinya file bukan object.
         console.log('ini apa ?:', newArr);
         setAvatar(newArr);
         setPic(response.data);
@@ -42,20 +42,26 @@ const Screen2 = () => {
       }
     });
   };
+  
+  
   const uploadPic = () => {
     setLoading(true);
-    console.log('ininama :', names);
-    console.log('inipoto :', avatar);
-    fetch('https://dev.dispenda.online/api/post-screen-2', {
+    
+    const data ={
+        name: names,
+        images: avatar,
+      }
+    
+    const url = 'https://dev.dispenda.online/api/post-screen-2'
+    const options = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        name: names,
-        images: avatar,
-      }),
-    })
+      body: JSON.stringify(data),
+    }
+   
+    fetch(url, options)
       .then((response) => response.json())
       .then((json) => {
         showSuccess('Photo yang anda upload success');
@@ -87,7 +93,7 @@ const Screen2 = () => {
             {avatar.map((poto, id) => {
               return (
                 <>
-                  <Image key={id} source={poto} style={styles.photo} />
+                  <Image key={id} source={{uri:poto}} style={styles.photo} />
                   <Gap width={13} />
                 </>
               );
