@@ -36,7 +36,10 @@ const Screen2 = () => {
         showError('Oops, sepertinya ada masalah');
       } else {
         let source = {uri: response.uri};
-        setAvatar(source);
+        setAvatar(source); // yang ini coba pake ... ini
+        // let newArr = [...avatar,source] coba ini dlu
+        // console.log("ini apa ?:",newArr)hasilnya dicba apa ?
+        //seAvatar(newArr) kalau ada array isinya banyak bisa di setAvatar
         setPic(response.data);
         showSuccess('Selamat anda sukses menambahkan gambar');
       }
